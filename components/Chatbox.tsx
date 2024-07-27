@@ -1,4 +1,5 @@
 import { ChatProps } from '@/lib/api/chat';
+import { getNewPrompt } from '@/lib/api/chatUtils';
 import React, { useCallback, useEffect, useState } from 'react';
 
 export const Chatbox = () => {
@@ -40,9 +41,14 @@ export const Chatbox = () => {
           body: JSON.stringify({ content: inputValue, role: 'user' })
         });
 
+        const chatResponse: ChatProps = await getNewPrompt(messages).then(
+          (res) => {
+            return { ...res.message, date: new Date() };
+          }
+        );
         if (response.ok) {
           const newMessage: ChatProps = await response.json();
-          setMessages([...messages, newMessage]);
+          setMessages([...messages, newMessage, chatResponse]);
         } else {
           console.error('Failed to send message');
         }
