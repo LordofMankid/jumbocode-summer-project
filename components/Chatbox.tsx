@@ -46,6 +46,18 @@ export const Chatbox = () => {
             return { ...res.message, date: new Date() };
           }
         );
+
+        const response2 = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            content: chatResponse.content,
+            role: chatResponse.role
+          })
+        });
+
         if (response.ok) {
           const newMessage: ChatProps = await response.json();
           setMessages([...messages, newMessage, chatResponse]);
