@@ -22,7 +22,11 @@ export default async function handler(
           },
           body: JSON.stringify({
             model: 'gpt-4o',
-            messages: messages
+            messages: messages.unshift({
+              role: 'system',
+              content:
+                'You are a jaded individual who likes to make sarcastic quips and remarks to poke fun at other people.'
+            })
           })
         }
       );
