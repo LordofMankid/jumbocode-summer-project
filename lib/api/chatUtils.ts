@@ -18,7 +18,7 @@ export const fetchJWT = async () => {
     }
 
     const data = await response.json();
-    console.log(data);
+    // console.log(data);
     return data; // setJwt(data.token);
   } catch (error) {
     console.error('Error fetching JWT:', error);
@@ -27,6 +27,7 @@ export const fetchJWT = async () => {
 
 export const getNewPrompt = async (messages: ChatProps[]) => {
   try {
+    // console.log(messages);
     const strippedMessages = messages.map(({ content, role }) => ({
       role: role === 'user' ? 'user' : 'assistant',
       content
@@ -54,7 +55,7 @@ export const getNewPrompt = async (messages: ChatProps[]) => {
     }
 
     const data = await response.json();
-    console.log('Response data:', data); // Debug log
+    // console.log('Response data:', data); // Debug log
     return data;
   } catch (error) {
     console.error('Error:', error);

@@ -1,6 +1,6 @@
 import { ChatProps } from '@/lib/api/chat';
 import { getNewPrompt } from '@/lib/api/chatUtils';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 export const Chatbox = () => {
   const [messages, setMessages] = useState<ChatProps[]>([]);
@@ -30,37 +30,53 @@ export const Chatbox = () => {
   }, [fetchMessages]);
 
   const handleSend = useCallback(async () => {
-    console.log(inputValue);
     if (inputValue.trim()) {
       try {
+        const newChat: ChatProps = {
+          content: inputValue,
+          role: 'user',
+          date: new Date()
+        };
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ content: inputValue, role: 'user' })
+          body: JSON.stringify(newChat)
         });
 
-        const chatResponse: ChatProps = await getNewPrompt(messages).then(
-          (res) => {
-            return { ...res.message, date: new Date() };
-          }
-        );
-
-        const response2 = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            content: chatResponse.content,
-            role: chatResponse.role
-          })
+        const chatResponse: ChatProps = await getNewPrompt([
+          ...messages,
+          newChat
+        ]).then((res) => {
+          return { ...res.message, date: new Date() };
         });
+
+        if (chatResponse) {
+          await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              content: chatResponse.content,
+              role: chatResponse.role
+            })
+          });
+        }
 
         if (response.ok) {
           const newMessage: ChatProps = await response.json();
-          setMessages([...messages, newMessage, chatResponse]);
+          if (chatResponse) {
+            setMessages([...messages, newMessage, chatResponse]);
+          } else {
+            const noResponse: ChatProps = {
+              content: 'error',
+              role: 'assistant',
+              date: new Date()
+            };
+            setMessages([...messages, newMessage, noResponse]);
+          }
         } else {
           console.error('Failed to send message');
         }
@@ -69,6 +85,7 @@ export const Chatbox = () => {
       }
 
       setInputValue('');
+      fetchMessages();
     }
   }, [inputValue, messages]);
 

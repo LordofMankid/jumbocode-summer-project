@@ -1,3 +1,4 @@
+import { postChat } from '@/lib/api/chat';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(
@@ -6,12 +7,11 @@ export default async function handler(
 ) {
   if (req.method === 'POST') {
     // Fetch the JWT from the external API
-    console.log('YOOO');
     const { messages, token } = req.body;
+
     if (!token) {
       return res.status(401).json({ error: 'No token provided' });
     }
-
     try {
       const response = await fetch(
         'https://tl-onboarding-project-dxm7krgnwa-uc.a.run.app/prompt',
@@ -38,6 +38,7 @@ export default async function handler(
       // console.log(res);
       console.log(error);
       res.status(500).json({ error: `Internal Server Error` });
+      await postChat('error', 'assistant');
     }
   } else {
     res.setHeader('Allow', ['POST']);
